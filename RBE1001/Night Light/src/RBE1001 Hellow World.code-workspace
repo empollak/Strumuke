@@ -1,0 +1,23 @@
+{
+    "folders": [
+        {
+            "path": ".."
+        },
+        {
+            "name": "StaticsCalculator",
+            "path": "../../StaticsCalculator"
+        },
+        {
+            "name": "ServoMotor",
+            "path": "../../ServoMotor"
+        },
+        {
+            "name": "AlarmSystem",
+            "path": "../../AlarmSystem"
+        },
+        {
+            "name": "Home Alarm Actual",
+            "path": "../../Home Alarm Actual"
+        }
+    ]
+}
