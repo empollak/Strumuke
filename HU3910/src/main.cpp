@@ -5,9 +5,8 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <SPI.h>
 #include <Adafruit_ADS1X15.h>
-Adafruit_ADS1115 ads1 = Adafruit_ADS1115();
-Adafruit_ADS1115 ads2 = Adafruit_ADS1115();
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+#include "..\..\Common Headers\Global.h"
+#include "..\..\Common Headers\Arm.h"
 
 // Rightmost string is A, leftmost is G
 

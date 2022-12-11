@@ -1,5 +1,5 @@
-#ifndef Chord_h
-#define Chord_h
+#ifndef Arm_h
+#define Arm_h
 
 class Arm {
     private:

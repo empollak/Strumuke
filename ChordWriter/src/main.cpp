@@ -2,17 +2,14 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <SPI.h>
 #include <Adafruit_ADS1X15.h>
-#include "Arm.h"
-#include "Global.h"
+#include "..\..\Common Headers\Arm.h"
+#include "..\..\Common Headers\Global.h"
 
 // Need to have two separate arrays for the pot reading and the required pulselen. Somehow need to output that so the other code can use it.
 
 
 // Implement jogging for all the arms
 // Implement the ADC
-
-
-Arm arm1(1);
 
 Arm arms[3] = {Arm(1), Arm(2), Arm(3)};
 
