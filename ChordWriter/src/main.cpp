@@ -67,15 +67,9 @@ void setup() {
   while(!conn) {}
   pwm.begin();
   pwm.sleep();
-	String chords[] = {"CM", "FM", "Am"} ; // CM FM AM
-  int chordsSize = sizeof(chords)/sizeof(chords[3]);
-  // servoData holds all of the pulselen data for each servo for every arm.
-  // First layer is which chord, second layer is which arm, third layer is which servo
-  int servoData[chordsSize][3][3];
-  // servodatapot will have the position feedback data
-  int servoDataPot[chordsSize][3][3];
   String input;
   
+  // Set neutral for all arms
   for (Arm arm : arms) {
     Serial.println("Set neutral position for arm " + String(arm.num + 1) + " then press b");
     getInput();
@@ -83,6 +77,7 @@ void setup() {
     setArraysEqual(arm.neutral, armPos);
   }
 
+  // Set each arm's position for each fret/string combo
   for (int string = 0; string < 4; string++) {
     for (int fret = 0; fret < 4; fret++) {      
       for (Arm arm : arms) {
@@ -109,12 +104,14 @@ void setup() {
 
   // Calibrate the pulselen for the arms based on pos feedback
   for (Arm arm : arms) {
+
     // Save the position feedback data before calibrating the pulselen
     setArraysEqual(arm.neutralPot, arm.neutral);
 
     Serial.println("Neutral");
     arm.calibrateForChord(arm.neutral);
 
+    // Calibrate each string/fret combo
     for (int string = 0; string < 4; string++) {
       for (int fret = 0; fret < 3; fret++) {
         int *posData = arm.noteData[string][fret];
@@ -130,6 +127,8 @@ void setup() {
         }
       }
     }
+
+    // reset arm once done to make space for the next one
     arm.moveTo(arm.neutral);
   }
 
