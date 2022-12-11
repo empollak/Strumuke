@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include <Adafruit_ADS1X15.h>
 #include "Arm.h"
+#include "Global.h"
 
 // Need to have two separate arrays for the pot reading and the required pulselen. Somehow need to output that so the other code can use it.
 
@@ -10,9 +11,6 @@
 // Implement jogging for all the arms
 // Implement the ADC
 
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
-Adafruit_ADS1115 ads1 = Adafruit_ADS1115();
-Adafruit_ADS1115 ads2 = Adafruit_ADS1115();
 
 Arm arm1(1);
 
@@ -244,88 +242,40 @@ void setup() {
   int servoDataPot[chordsSize][3][3];
   String input;
   
-  
-  Serial.println("Set neutral position for arm 1 then press b then enter");
-  getInput();
-  int arm1Pos[3] = {getServo(1, 0), getServo(1, 1), getServo(1, 2)};
-  setArraysEqual(arms[0].neutral, arm1Pos);
-  Serial.println("Set neutral position for arm 2 then press b then enter");
-  getInput();
-  int arm2Pos[3] = {getServo(2, 0), getServo(2, 1), getServo(2, 2)};
-  setArraysEqual(arms[1].neutral, arm2Pos);
-  Serial.println("Set neutral position for arm 3 then press b then enter");
-  getInput();
-  int arm3Pos[3] = {getServo(3, 0), getServo(3, 1), getServo(3, 2)};
-  setArraysEqual(arms[2].neutral, arm3Pos);
+  for (int arm = 0; arm < 3; arm++) {
+    Serial.println("Set neutral position for arm " + String(arm) + " then press b");
+    getInput();
+    int armPos[3] = {getServo(arm, 0), getServo(arm, 1), getServo(arm, 2)};
+    setArraysEqual(arms[arm].neutral, armPos);
+  }
   
 
   // neutral holds the data for each servo for the neutral position
   // first layer is which arm, second is which servo
   // Here it holds the given position feedback for neutral
   // int neutral[3][3] = {{arm1Pos[0], arm1Pos[1], arm1Pos[2]}, {arm2Pos[0], arm2Pos[1], arm2Pos[2]}, {3, 3, 3}};
-  int neutral[3][3] = {{arm1Pos[0], arm1Pos[1], arm1Pos[2]}, {arm2Pos[0], arm2Pos[1], arm2Pos[2]}, {arm3Pos[0], arm3Pos[1], arm3Pos[2]}};
+  //int neutral[3][3] = {{arm1Pos[0], arm1Pos[1], arm1Pos[2]}, {arm2Pos[0], arm2Pos[1], arm2Pos[2]}, {arm3Pos[0], arm3Pos[1], arm3Pos[2]}};
+
   int neutralPot[3][3];
   
-  // Fill servoData with the position feedback given for each chord
-  for (int i = 0; i < chordsSize; i++) {
-    String chord = chords[i];
-    Serial.println("Set arm 1 for chord " + chord + " then press b then enter, or press n then enter if it is neutral");
-    String input = getInput();
-    if (input.equals("b")) {
-      arm1Pos[0] = getServo(1, 0);
-      arm1Pos[1] = getServo(1, 1);
-      arm1Pos[2] = getServo(1, 2);
-    }
-    else {
-      arm1Pos[0] = neutral[0][0];
-      arm1Pos[1] = neutral[0][1];
-      arm1Pos[2] = neutral[0][2];
-    }
-  
-    Serial.println("Set arm 2 for chord " + chord + " then press b then enter, or press n then enter if it is neutral");
-    input = getInput();
-    if (input.equals("b")) {
-      arm2Pos[0] = getServo(2, 0);
-      arm2Pos[1] = getServo(2, 1);
-      arm2Pos[2] = getServo(2, 2);
-    }
-    else {
-      arm2Pos[0] = neutral[1][0];
-      arm2Pos[1] = neutral[1][1];
-      arm2Pos[2] = neutral[1][2];
-    }
-  
-    Serial.println("Set arm 3 for chord " + chord + " then press b then enter, or press n then enter if it is neutral");
-    input = getInput();
-    if (input.equals("b")) {
-      arm3Pos[0] = getServo(3, 0);
-      arm3Pos[1] = getServo(3, 1);
-      arm3Pos[2] = getServo(3, 2);
-    }
-    else {
-      arm3Pos[0] = neutral[2][0];
-      arm3Pos[1] = neutral[2][1];
-      arm3Pos[2] = neutral[2][2];
-    }
+  enum {A, E, C, G};
 
-    
-    servoData[i][0][0] = arm1Pos[0];
-    servoData[i][0][1] = arm1Pos[1];
-    servoData[i][0][2] = arm1Pos[2];
-    servoData[i][1][0] = arm2Pos[0];
-    servoData[i][1][1] = arm2Pos[1];
-    servoData[i][1][2] = arm2Pos[2];
-    servoData[i][2][0] = arm3Pos[0];
-    servoData[i][2][1] = arm3Pos[1];
-    servoData[i][2][2] = arm3Pos[2];
-  }
+  for (int string = A; string < G; string++) {
+    for (int fret = 0; fret < 4; fret++) {      
+      for (int arm = 0; arm < 3; arm++) {
 
-  // Save all the position feedback data before calibrating the pulselen
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      neutralPot[i][j] = neutral[i][j];
-      for (int k = 0; k < chordsSize; k++) {
-        servoDataPot[k][i][j] = servoData[k][i][j];
+        Serial.println("Set arm " + String(arm) + 
+                " for string " + String(string + 1) " (1-indexed, starting at A, which is the lowest physically when held normally) " + 
+                " fret " + String(fret) + " then press b, or n if it is neutral");
+
+        String input = getInput();
+
+        if (input.equals("b")) {
+          int armPos[3] = {getServo(arm, 0), getServo(arm, 1), getServo(arm, 2)};
+          setArraysEqual(arms[arm].noteData[string][fret], armPos);
+        } else {
+          setArraysEqual(arms[arm].noteData[string][fret], arms[arm].neutral);
+        }
       }
     }
   }
@@ -335,36 +285,26 @@ void setup() {
   pwm.setOscillatorFrequency(27000000);
   pwm.setPWMFreq(50);
   Serial.println("Calibrating...");
-  // CALIBRATING NEUTRAL
-  // ARM 1
-  Serial.println("Neutral");
-  calibrateArmForChord(1, neutral[0]);
-  calibrateArmForChord(2, neutral[1]);
-  calibrateArmForChord(3, neutral[2]);
 
-  for (int i = 0; i < chordsSize; i++) {
-    Serial.println("Chord " + String(chords[i]));
-    
-    if (!arrayEquals(servoData[i][0], neutralPot[0])) calibrateArmForChord(1, servoData[i][0]);
-    else setArraysEqual(servoData[i][0], neutral[0]);
+  // Calibrate the pulselen for the arms based on pos feedback
+  for (int arm = 0; arm < 3; arm++) {
+    // Save the position feedback data before calibrating the pulselen
+    setArraysEqual(arms[arm].neutralPot, arms[arm].neutral);
 
-    armMoveTo(neutral[0], 1);
+    Serial.println("Neutral");
+    calibrateArmForChord(arm, arms[arm].neutral);
 
-    if (!arrayEquals(servoData[i][0], neutralPot[1])) calibrateArmForChord(2, servoData[i][1]);
-    else setArraysEqual(servoData[i][1], neutral[1]);
+    for (int string = 0; string < 4; string++) {      
+      for (int fret = 0; fret < 3; fret++) {
+        int *posData = arms[arm].noteData[string][fret];
 
-    armMoveTo(neutral[1], 2);
-
-    if (!arrayEquals(servoData[i][0], neutralPot[2])) calibrateArmForChord(3, servoData[i][2]);
-    else setArraysEqual(servoData[i][2], neutral[2]);
-
-    armMoveTo(neutral[2], 3);
-  }
-
-  for (int i = 0; i <=2; i++) {
-    for (int j = 0; j <= 2; j++) {
-      pwm.setPWM(i*3 + j, 0, neutral[i][j]);
+        if (arrayEquals(arms[arm].neutralPot, posData)) setArraysEqual(posData, arms[arm].neutral);
+        else calibrateArmForChord(arm, posData);
+      }
     }
+
+    arms[arm].moveTo(arms[arm].neutral);
+    
   }
 
   Serial.println("Place arm 1 in neutral with uiojkl, press h to set (will move servos)");

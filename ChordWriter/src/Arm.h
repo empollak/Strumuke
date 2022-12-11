@@ -7,13 +7,11 @@ class Arm {
 
     public:
         Arm(int num);
+        void moveTo(int* servoData);
         int neutral[3];
-        int A_1[3];
-        int A_2[3];
-        int A_3[3];
-        int A_4[3];
-        int A_5[3];
-        int A_6[3];
+        int neutralPot[3];
+        // Top level array is strings (0=A), next down is fret
+        int noteData[4][4][3];
 };
 
 #endif
