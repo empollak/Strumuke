@@ -2,6 +2,7 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <SPI.h>
 #include <Adafruit_ADS1X15.h>
+#include "Arm.h"
 
 // Need to have two separate arrays for the pot reading and the required pulselen. Somehow need to output that so the other code can use it.
 
@@ -12,6 +13,10 @@
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 Adafruit_ADS1115 ads1 = Adafruit_ADS1115();
 Adafruit_ADS1115 ads2 = Adafruit_ADS1115();
+
+Arm arm1(1);
+
+Arm arms[3] = {Arm(1), Arm(2), Arm(3)};
 
 int knownSafe[3][3] = {{260, 460, 490}, {480, 450, 490}, {250, 120, 110}};
 // Chord AM (new ServoPositions(238, 332, 390), new ServoPositions(446, 254, 399), new ServoPositions(1726, 1726, 1726));
@@ -243,12 +248,15 @@ void setup() {
   Serial.println("Set neutral position for arm 1 then press b then enter");
   getInput();
   int arm1Pos[3] = {getServo(1, 0), getServo(1, 1), getServo(1, 2)};
+  setArraysEqual(arms[0].neutral, arm1Pos);
   Serial.println("Set neutral position for arm 2 then press b then enter");
   getInput();
   int arm2Pos[3] = {getServo(2, 0), getServo(2, 1), getServo(2, 2)};
+  setArraysEqual(arms[1].neutral, arm2Pos);
   Serial.println("Set neutral position for arm 3 then press b then enter");
   getInput();
   int arm3Pos[3] = {getServo(3, 0), getServo(3, 1), getServo(3, 2)};
+  setArraysEqual(arms[2].neutral, arm3Pos);
   
 
   // neutral holds the data for each servo for the neutral position

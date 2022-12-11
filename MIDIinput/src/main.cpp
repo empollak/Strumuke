@@ -3,8 +3,6 @@
 #include <Adafruit_ADS1X15.h>
 #include "Chord.h"
 
-// this is noterefactor i think
-
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 Adafruit_ADS1115 ads1 = Adafruit_ADS1115();
 
