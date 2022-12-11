@@ -21,7 +21,7 @@ Arm::Arm(int num) {
     }
 }
 
-Arm::Arm(int num, int* neutral, int* neutralPot, int *** servoData) {
+Arm::Arm(int num, int neutral[3], int neutralPot[3], int servoData[4][4][3]) {
     this->num = num;
     for (int servo = 0; servo < 3; servo++) {
         for (int string = 0; string < 4; string++) {
