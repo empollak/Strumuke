@@ -23,10 +23,4 @@ class Arm {
         int noteData[4][4][3];
 };
 
-int arm1Data[4][4][3] = {{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, 
-                                        {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}};
-int arm1Neutral[3] = {0, 0, 0};
-int arm1NeutralPot[3] = {0, 0, 0};
-Arm arm1 = Arm(1, arm1Neutral, arm1Neutral, arm1Data);
-
 #endif

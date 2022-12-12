@@ -1,5 +1,11 @@
 #include "Arm.h"
-#include "Global.h"
+#include <Adafruit_PWMServoDriver.h>
+#include <Adafruit_ADS1X15.h>
+
+extern Adafruit_ADS1115 ads1;
+extern Adafruit_ADS1115 ads2;
+extern Adafruit_PWMServoDriver pwm;
+extern int knownSafe[3][3];
 
 Arm::Arm(int num) {
     this->num = num;
@@ -39,11 +45,11 @@ void Arm::print() {
     // Arm arm1 = Arm(1, 
     Serial.print("Arm arm" + String(this->num) + " = Arm(" + String(this->num) + ", ");
     // {neutral0, neutral1, neutral2}, 
-    Serial.print("{" + String(neutral[0]) + ", " + String(neutral[1]) + ", " + String(neutral[2]) + "}, ");
+    Serial.print("(const int[3]) {" + String(neutral[0]) + ", " + String(neutral[1]) + ", " + String(neutral[2]) + "}, ");
     // {neutralPot0, neutralPot1, neutralPot2}, 
-    Serial.print("{" + String(neutralPot[0]) + ", " + String(neutralPot[1]) + ", " + String(neutralPot[2]) + "}, ");
+    Serial.print("(const int[3]) {" + String(neutralPot[0]) + ", " + String(neutralPot[1]) + ", " + String(neutralPot[2]) + "}, ");
     // {{{noteData[0][0][0], noteData[0][0][1], ...}, {noteData[0][1][0]}}}
-    Serial.print("{");
+    Serial.print("(const int[4][4][3]) {");
     for (int string = 0; string < 4; string++) {
         Serial.print("{");
         for (int fret = 0; fret < 4; fret++) {
@@ -58,7 +64,7 @@ void Arm::print() {
         if (string < 3) Serial.print("}, ");
         else Serial.print("}");
     }
-    Serial.println("}");
+    Serial.println("});");
 }
 
 

@@ -5,8 +5,19 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <SPI.h>
 #include <Adafruit_ADS1X15.h>
-#include "..\..\Common Headers\Global.h"
-#include "..\..\Common Headers\Arm.h"
+#include "Arm.h"
+
+extern Adafruit_ADS1115 ads1;
+extern Adafruit_ADS1115 ads2;
+extern Adafruit_PWMServoDriver pwm;
+extern int knownSafe[3][3];
+
+Arm arm1 = Arm(1, (const int[3]) {262, 464, 485}, (const int[3]) {6600, 11482, 11990}, (const int[4][4][3]) {{{262, 464, 485}, {262, 464, 485}, {0, 0, 0}, {0, 0, 0}}, {{290, 316, 327}, {250, 306, 307}, {0, 0, 0}, {0, 0, 
+0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}});
+Arm arm2 = Arm(2, (const int[3]) {421, 387, 497}, (const int[3]) {10398, 9792, 12247}, (const int[4][4][3]) {{{486, 211, 466}, {421, 387, 497}, {0, 0, 0}, {0, 0, 0}}, {{464, 222, 436}, {509, 220, 403}, {0, 0, 0}, {0, 0, 
+0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}});
+Arm arm3 = Arm(3, (const int[3]) {226, 100, 103}, (const int[3]) {224, 89, 104}, (const int[4][4][3]) {{{142, 268, 150}, {226, 100, 103}, {0, 0, 0}, {0, 0, 0}}, {{157, 271, 174}, {226, 100, 103}, {0, 0, 0}, {0, 0, 0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}});
+
 
 // Rightmost string is A, leftmost is G
 
