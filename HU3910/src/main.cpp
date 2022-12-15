@@ -5,9 +5,20 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <SPI.h>
 #include <Adafruit_ADS1X15.h>
-Adafruit_ADS1115 ads1 = Adafruit_ADS1115();
-Adafruit_ADS1115 ads2 = Adafruit_ADS1115();
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+#include "Arm.h"
+#include "CustomStepper.h"
+
+extern Adafruit_ADS1115 ads1;
+extern Adafruit_ADS1115 ads2;
+extern Adafruit_PWMServoDriver pwm;
+extern int knownSafe[3][3];
+
+Arm arm1 = Arm(1, (const int[3]) {262, 464, 485}, (const int[3]) {6600, 11482, 11990}, (const int[4][4][3]) {{{262, 464, 485}, {262, 464, 485}, {0, 0, 0}, {0, 0, 0}}, {{290, 316, 327}, {250, 306, 307}, {0, 0, 0}, {0, 0, 
+0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}});
+Arm arm2 = Arm(2, (const int[3]) {421, 387, 497}, (const int[3]) {10398, 9792, 12247}, (const int[4][4][3]) {{{486, 211, 466}, {421, 387, 497}, {0, 0, 0}, {0, 0, 0}}, {{464, 222, 436}, {509, 220, 403}, {0, 0, 0}, {0, 0, 
+0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}});
+Arm arm3 = Arm(3, (const int[3]) {226, 100, 103}, (const int[3]) {224, 89, 104}, (const int[4][4][3]) {{{142, 268, 150}, {226, 100, 103}, {0, 0, 0}, {0, 0, 0}}, {{157, 271, 174}, {226, 100, 103}, {0, 0, 0}, {0, 0, 0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}});
+
 
 // Rightmost string is A, leftmost is G
 
@@ -23,78 +34,16 @@ int tempo = 40; // tempo in bpm
 float deadenDelay = 100; 
 
 enum string {A, E, C, G, bar};
-Chord neutral (new ServoPositions(251, 448, 476), new ServoPositions(422, 410, 505), new ServoPositions(224, 100, 98));
-Chord CM (new ServoPositions(241, 430, 480), new ServoPositions(411, 405, 467), new ServoPositions(243, 288, 116));
-Chord FM (new ServoPositions(237, 337, 389), new ServoPositions(469, 253, 432), new ServoPositions(226, 100, 110));
-Chord Am (new ServoPositions(234, 337, 399), new ServoPositions(411, 405, 468), new ServoPositions(229, 100, 110));
-Chord neutralPot (new ServoPositions(6284, 11045, 11766), new ServoPositions(10388, 10260, 12351), new ServoPositions(219, 87, 90));
-Chord CMPot (new ServoPositions(6284, 11045, 11766), new ServoPositions(10388, 10260, 12351), new ServoPositions(234, 269, 113));
-Chord FMPot (new ServoPositions(6140, 8683, 9959), new ServoPositions(10897, 6690, 10908), new ServoPositions(219, 87, 90));
-Chord AMPot (new ServoPositions(6142, 8673, 9957), new ServoPositions(10884, 6670, 9788), new ServoPositions(219, 87, 90));
+Chord neutral(arm1.neutral, arm2.neutral, arm3.neutral);
+Chord neutralPot(arm1.neutralPot, arm2.neutralPot, arm3.neutralPot);
+Chord AM (arm1.noteData[1][1], arm2.neutral, arm3.neutral);
 
 // Arm 1 is the top arm
-// Arm 2 is the bottom arm closer to the body of the uke
-// Arm 3 is the bottom arm closer to the end of the fretboard
+// Arm 2 is the bottom arm closer to the nut
+// Arm 3 is the bottom arm closer to the body of the uke
 
-Play* song[] = {new Play (CM, 3, down), new Play (Am, 1, up), new Play (FM, 1, up), new Play (CM, 1, up), new Play (Am, 1, up), new Play (FM, 1, up), new Play (CM, 1, up)};
+Play* song[] = {new Play (AM, 3, down)};
 
-// used to define how all of the servos are read
-int getServo(int arm, int servo) {
-  switch (arm) {
-    case 1:
-    switch (servo) {
-      case 0:
-      return ads1.readADC_SingleEnded(0);
-      break;
-
-      case 1:
-      return ads1.readADC_SingleEnded(1);
-      break;
-
-      default:
-      return ads1.readADC_SingleEnded(2);
-      break;
-    }
-    break;
-
-    case 2:
-    switch (servo) {
-      case 0:
-      return ads2.readADC_SingleEnded(0);
-      break;
-
-      case 1:
-      return ads2.readADC_SingleEnded(1);
-      break;
-
-      default:
-      return ads2.readADC_SingleEnded(2);
-      break;
-    }
-
-    case 3:
-    switch (servo) {
-      case 0:
-      return analogRead(17);
-      break;
-
-      case 1:
-      return analogRead(16);
-      break;
-
-      case 2:
-      return analogRead(15);
-      break;
-    }
-  }
-}
-
-void Arm1MoveTo (ServoPositions* pos) {
-  pwm.setPWM(0, 0, pos->base);
-  pwm.setPWM(1, 0, pos->joint1);
-  pwm.setPWM(2, 0, pos->joint2);
-  Serial.println("Base: " + String(pos->base) + " Joint 1 " + String(pos->joint1) + " Joint 2 " + String(pos->joint2));
-}
 
 void armMoveTo(ServoPositions* pos, int arm) {
   pwm.setPWM(0 + (arm-1)*3, 0, pos->base);
@@ -104,42 +53,23 @@ void armMoveTo(ServoPositions* pos, int arm) {
 
 // want to make this blocking but can't until i get the pot values from ChordWriter
 void placeArms(Chord chord) {
-  armMoveTo(chord.servoPosArm1, 1);
-  armMoveTo(chord.servoPosArm2, 2);
-  armMoveTo(chord.servoPosArm3, 3);
+  arm1.moveTo(chord.arm1Pos);
+  arm2.moveTo(chord.arm2Pos);
+  arm3.moveTo(chord.arm3Pos);
   ARM_STATE = PLAYING;
 }
 
 int getServoData(int arm, int servo, Chord data) {
-  ServoPositions* servos;
-  if (arm == 1) servos = data.servoPosArm1;
-  else if (arm == 2) servos = data.servoPosArm2;
-  else servos = data.servoPosArm3;
-  if (servo == 0) return servos->base;
-  if (servo == 1) return servos->joint1;
-  else return servos->joint2;
+  if (arm == 1) return data.arm1Pos[servo];
+  else if (arm == 2) return data.arm2Pos[servo];
+  else return data.arm3Pos[servo];
 }
 
 void resetArms() {
-  armMoveTo(neutral.servoPosArm1, 1);
-  armMoveTo(neutral.servoPosArm2, 2);
-  armMoveTo(neutral.servoPosArm3, 3);
+  arm1.moveTo(arm1.neutral);
+  arm2.moveTo(arm2.neutral);
+  arm3.moveTo(arm3.neutral);
 
-  // Make sure the arms are neutral before releasing them from this, for safety
-  // unsigned long startedMoving = millis();
-  // while (millis() - startedMoving < 1000) {
-  //   int allowableDelta = 500;
-  //   bool inPosition = true;
-  //   for (int i = 1; i <= 3; i++) {
-  //     if (i != 3) { // This if statement should be taken out once all arms are in place
-  //       for (int j = 0; j <= 2; j++) {
-  //         if (abs(getServo(i, j) - getServoData(i, j, neutralPot)) > allowableDelta) inPosition = false;
-  //       }
-  //     }
-  //   }
-  //   // Serial.println(String(inPosition) + "\t" + String(millis() - startedMoving));
-  //   if (inPosition) break;
-  // }
   delay(50);
   ARM_STATE = NEUTRAL;
 }
@@ -157,14 +87,11 @@ void undeaden() {
   Serial.println("undead");
 }
 
-int min = 150;
-int max = 500;
-#define POT_PIN 17
-#define SERVO_PIN 16
 void setup() {
  
-  pinMode(SERVO_PIN, INPUT);
-  pinMode(POT_PIN, INPUT);
+  pinMode(17, INPUT);
+  pinMode(16, INPUT);
+  pinMode(15, INPUT);
 
   Serial.begin(9600);
   pwm.begin();
@@ -172,9 +99,6 @@ void setup() {
   pwm.setPWMFreq(50);
   ads1.begin(0b1001000);
   ads2.begin(0b1001010);
-  
-  
-  
 }
 
 
@@ -189,6 +113,8 @@ void loop() {
   Serial.println("going");
 
   placeArms(song[0]->chord); // can this be blocking
+
+  delay(100);
   
   unsigned long lastBeatTime = millis();
   bool deadened = false;

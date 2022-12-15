@@ -2,10 +2,18 @@
 #include <SPI.h>
 #include <Adafruit_ADS1X15.h>
 #include <Adafruit_PWMServoDriver.h>
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
-Adafruit_ADS1115 ads1 = Adafruit_ADS1115();
-Adafruit_ADS1115 ads2 = Adafruit_ADS1115();
+#include "Arm.h"
 
+extern Adafruit_PWMServoDriver pwm;
+extern Adafruit_ADS1115 ads1;
+extern Adafruit_ADS1115 ads2;
+extern int knownSafe[3][3];
+
+Arm arm1 (1);
+Arm arm2 (2);
+Arm arm3 (3);
+
+Arm arms[] = {arm1, arm2, arm3};
 
 // Adafruit_ADS1115 ads1 = Adafruit_ADS1115();
 
@@ -24,9 +32,6 @@ Adafruit_ADS1115 ads2 = Adafruit_ADS1115();
 // 260 50 480 all the way up
 // 90 170 80 all the way downh
 // default neutral: 260 110 90
-
-int knownSafe[3][3] = {{260, 460, 490}, {480, 450, 490}, {250, 120, 110}};
-
 // int knownSafe[3][3] = {{237, 337, 389}, {469, 253, 432}, {226, 100, 110}};
 
 
@@ -82,21 +87,27 @@ void setup() {
     if (input.equals("u")) {
       offset0 += dir0*delta;
       Serial.println(offset0);
+      Serial.println(arms[arm].getServo(0));
     } else if (input.equals("j")) {
       offset0 -= dir0*delta;
       Serial.println(offset0);
+      Serial.println(arms[arm].getServo(0));
     } else if (input.equals("i")) {
       offset1 += dir1*delta;
       Serial.println(offset1);
+      Serial.println(arms[arm].getServo(1));
     } else if (input.equals("k")) {
       offset1 -= dir1*delta;
       Serial.println(offset1);
+      Serial.println(arms[arm].getServo(1));
     } else if (input.equals("o")) {
       offset2 += dir2*delta;
       Serial.println(offset2);
+      Serial.println(arms[arm].getServo(2));
     } else if (input.equals("l")) {
       offset2 -= dir2*delta; 
       Serial.println(offset2);
+      Serial.println(arms[arm].getServo(2));
     } else if (input.equals("h")) {
       stop = true;
     }
