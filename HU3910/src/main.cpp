@@ -6,6 +6,7 @@
 #include <SPI.h>
 #include <Adafruit_ADS1X15.h>
 #include "Arm.h"
+#include "CustomStepper.h"
 
 extern Adafruit_ADS1115 ads1;
 extern Adafruit_ADS1115 ads2;
@@ -38,8 +39,8 @@ Chord neutralPot(arm1.neutralPot, arm2.neutralPot, arm3.neutralPot);
 Chord AM (arm1.noteData[1][1], arm2.neutral, arm3.neutral);
 
 // Arm 1 is the top arm
-// Arm 2 is the bottom arm closer to the body of the uke
-// Arm 3 is the bottom arm closer to the end of the fretboard
+// Arm 2 is the bottom arm closer to the nut
+// Arm 3 is the bottom arm closer to the body of the uke
 
 Play* song[] = {new Play (AM, 3, down)};
 

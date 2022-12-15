@@ -18,6 +18,10 @@
 		},
 		{
 			"path": "Common Headers"
+		},
+		{
+			"name": "Max Testing",
+			"path": "Max Testing"
 		}
 	],
 	"settings": {
