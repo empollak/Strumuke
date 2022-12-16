@@ -82,7 +82,8 @@ void Arm::calibrateForChord(int* servoData) {
 
     delay(300);
 
-    servoData[2] = calibrateServo(2, servoData[2], knownSafe[arm-1][2]);
+    if (arm == 1) servoData[2] = knownSafe[0][2];
+    else servoData[2] = calibrateServo(2, servoData[2], knownSafe[arm-1][2]);
     servoData[0] = calibrateServo(0, servoData[0], knownSafe[arm-1][0]);
     servoData[1] = calibrateServo(1, servoData[1], knownSafe[arm-1][1]);
 }
