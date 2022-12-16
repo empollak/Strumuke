@@ -3,11 +3,14 @@
 #include <Adafruit_ADS1X15.h>
 #include <Adafruit_PWMServoDriver.h>
 #include "Arm.h"
+#include "CustomStepper.h"
 
-extern Adafruit_PWMServoDriver pwm;
-extern Adafruit_ADS1115 ads1;
-extern Adafruit_ADS1115 ads2;
-extern int knownSafe[3][3];
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
+Adafruit_ADS1115 ads1 = Adafruit_ADS1115();
+Adafruit_ADS1115 ads2 = Adafruit_ADS1115();
+int knownSafe[3][3] = {{290, 500, 464}, {418, 320, 492}, {260, 106, 104}};
+
+CustomStepper stepper (9, 8, 13);
 
 Arm arm1 (1);
 Arm arm2 (2);
@@ -49,7 +52,7 @@ void setup() {
   pwm.reset();
   pwm.setOscillatorFrequency(27000000);
   pwm.setPWMFreq(50);
-  int arm = 1; 
+  int arm = 2; 
   Serial.println(String(ads2.readADC_SingleEnded(0)) + "\t" + String(ads2.readADC_SingleEnded(1)) + "\t" + String(ads2.readADC_SingleEnded(2)));
   delay(100);
   delay(50);
@@ -57,30 +60,32 @@ void setup() {
   int offset0 = 0;
   int offset1 = 0;
   int offset2 = 0;
-  int delta = 10;
+  int delta = 2;
   int dir0 = 1;
   int dir1 = 1;
   int dir2 = 1;
-  if (arm == 1) {
-    dir0 = 1;
-    dir1 = 1;
-    dir2 = -1;
-  }
-  if (arm == 2) {
-    dir0 = -1;
-    dir1 = 1;
-    dir2 = -1;
-  }
-  if (arm == 3) {
-    dir0 = -1;
-    dir1 = -1;
-    dir2 = 1;
-  }
+  Serial.println("Known safe arm " + String(arm) + "\t" + String(knownSafe[arm-1][0]) + "\t" + String(knownSafe[arm-1][1]) + "\t" + String(knownSafe[arm-1][2]));
   while (!stop) {
 
+    if (arm == 1) {
+      dir0 = 1;
+      dir1 = 1;
+      dir2 = -1;
+    }
+    if (arm == 2) {
+      dir0 = -1;
+      dir1 = 1;
+      dir2 = -1;
+    }
+    if (arm == 3) {
+      dir0 = -1;
+      dir1 = -1;
+      dir2 = 1;
+    }
     pwm.setPWM(0 + (arm-1)*3, 0, knownSafe[arm-1][0] + offset0);
     pwm.setPWM(1 + (arm-1)*3, 0, knownSafe[arm-1][1] + offset1);
     pwm.setPWM(2 + (arm-1)*3, 0, knownSafe[arm-1][2] + offset2);
+
 
     while(Serial.available() == 0) {}
     String input = Serial.readString();
@@ -110,6 +115,36 @@ void setup() {
       Serial.println(arms[arm].getServo(2));
     } else if (input.equals("h")) {
       stop = true;
+    } else if (input.equals("1")) {
+      arm = 1;
+      Serial.println("Known safe arm " + String(arm) + "\t" + String(knownSafe[arm-1][0]) + "\t" + String(knownSafe[arm-1][1]) + "\t" + String(knownSafe[arm-1][2]));
+    } else if (input.equals("2")) {
+      arm = 2;
+      Serial.println("Known safe arm " + String(arm) + "\t" + String(knownSafe[arm-1][0]) + "\t" + String(knownSafe[arm-1][1]) + "\t" + String(knownSafe[arm-1][2]));
+    } else if (input.equals("3")) {
+      arm = 3;
+      Serial.println("Known safe arm " + String(arm) + "\t" + String(knownSafe[arm-1][0]) + "\t" + String(knownSafe[arm-1][1]) + "\t" + String(knownSafe[arm-1][2]));
+    }
+    if (input.equals("t")) {
+      stepper.step(175, 0);
+      // stepper.step(1, 0);
+      // steps += 1;
+      // Serial.println(steps);
+    } else if (input.equals("g")) {
+      stepper.step(175, 1);
+      // stepper.step(1, 1);
+      // steps -= 1;
+      // Serial.println(steps);
+    } else if (input.equals("r")) {
+      Serial.println("damp");
+      digitalWrite(4, HIGH);
+    } else if (input.equals("f")) {
+      Serial.println("undamp");
+      digitalWrite(4, LOW);
+    } else if (input.equals("e")) {
+      stepper.step(1, 0);
+    } else if (input.equals("d")) {
+      stepper.step(1, 1);
     }
   }
   Serial.println("0: " + String(knownSafe[arm-1][0]+offset0) + "\t" + "1: " + String(knownSafe[arm-1][1]+offset1) + "\t" + "2: " + String(knownSafe[arm-1][2]+offset2));

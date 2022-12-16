@@ -6,9 +6,6 @@
 
 class Chord {
     public:
-        // ServoPositions *servoPosArm1;
-        // ServoPositions *servoPosArm2;
-        // ServoPositions *servoPosArm3;
 
         int arm1Pos[3];
         int arm2Pos[3];

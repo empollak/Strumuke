@@ -1,7 +1,7 @@
 #include "CustomStepper.h"
 #include <Arduino.h>
 
-CustomStepper::CustomStepper(int stepPin, int dirPin, int limitPin, int pulseLength, int millisBetweenSteps) {
+CustomStepper::CustomStepper(int stepPin, int dirPin, int limitPin, int pulseLength, int microsBetweenSteps) {
     pinMode(stepPin, OUTPUT);
     pinMode(dirPin, OUTPUT);
     pinMode(limitPin, INPUT);
@@ -10,7 +10,7 @@ CustomStepper::CustomStepper(int stepPin, int dirPin, int limitPin, int pulseLen
     this->dirPin = dirPin;
     this->limitPin = limitPin;
     this->pulseLength = pulseLength;
-    this->millisBetweenSteps = millisBetweenSteps;
+    this->microsBetweenSteps = microsBetweenSteps;
 }
 
 CustomStepper::CustomStepper(int stepPin, int dirPin, int limitPin) {
@@ -23,6 +23,13 @@ CustomStepper::CustomStepper(int stepPin, int dirPin, int limitPin) {
     this->limitPin = limitPin;
 }
 
+CustomStepper::CustomStepper() {
+    pinMode(stepPin, OUTPUT);
+    pinMode(dirPin, OUTPUT);
+    pinMode(limitPin, INPUT);
+    digitalWrite(stepPin, LOW);
+}
+
 void CustomStepper::step(int steps, int dir) {
     int stepped = 0;
     digitalWrite(dirPin, dir);
@@ -30,17 +37,23 @@ void CustomStepper::step(int steps, int dir) {
         digitalWrite(this->stepPin, HIGH);
         delayMicroseconds(this->pulseLength);
         digitalWrite(this->stepPin, LOW);
-        delay(this->millisBetweenSteps);
+        delayMicroseconds(this->microsBetweenSteps);
         stepped++;
     }
 }
 
 void CustomStepper::home() {
-    // Figuring HIGH on the limitPin means it's pressed down
-    while(digitalRead(limitPin) == LOW) {
-        step(1, 0); // I am just guessing on which direction is which
+    // limitPin goes LOW when pressed down
+    // Only move if we aren't already homed at the edgeq
+    if (digitalRead(limitPin == HIGH)) {
+        while(digitalRead(limitPin) == HIGH) {
+            step(2, 1); 
+            delayMicroseconds(100);
+        }
+        step(5, 1);
     }
-    this->side = 0;
+    Serial.println("homed");
+    this->side = 1;
 }
 
 void CustomStepper::stepAcross() {
@@ -48,6 +61,9 @@ void CustomStepper::stepAcross() {
         Serial.println("Can't step across without being homed!");
         return;
     }
-    step(this->stepsAcross, side); // Still just guessing on which direction is which
-    this->side = !side;
+    step(this->stepsAcross, !side);
+    if (this->side == 0) {
+        home();
+    } else this->side = !side;
+    Serial.println("side " + String(side));
 }

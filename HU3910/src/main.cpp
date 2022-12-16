@@ -8,10 +8,13 @@
 #include "Arm.h"
 #include "CustomStepper.h"
 
+// This file should generally not be used
+
 extern Adafruit_ADS1115 ads1;
 extern Adafruit_ADS1115 ads2;
 extern Adafruit_PWMServoDriver pwm;
 extern int knownSafe[3][3];
+CustomStepper stepper = CustomStepper();
 
 Arm arm1 = Arm(1, (const int[3]) {262, 464, 485}, (const int[3]) {6600, 11482, 11990}, (const int[4][4][3]) {{{262, 464, 485}, {262, 464, 485}, {0, 0, 0}, {0, 0, 0}}, {{290, 316, 327}, {250, 306, 307}, {0, 0, 0}, {0, 0, 
 0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}, {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}});
@@ -99,6 +102,7 @@ void setup() {
   pwm.setPWMFreq(50);
   ads1.begin(0b1001000);
   ads2.begin(0b1001010);
+  
 }
 
 

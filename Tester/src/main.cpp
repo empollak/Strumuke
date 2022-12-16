@@ -2,10 +2,10 @@
 #include <Adafruit_PWMServoDriver.h>
 #include "CustomStepper.h"
 
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-CustomStepper stepper (9, 8, 1); // placeholder limit switch pin
+// This file is useful for testing the stepper motor
 
-// 149 steps across string. Moving away from the stepper motor is positive.
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+CustomStepper stepper = CustomStepper(); 
 
 int lastTime = millis();
 
@@ -16,6 +16,7 @@ void setup() {
   pinMode(9, OUTPUT);
   pinMode(8, OUTPUT);
   pinMode(4, OUTPUT);
+  pinMode(13, INPUT);
   Serial.begin(9600);
   Serial.setTimeout(50);
   while (Serial.available() == 0) {}
@@ -28,16 +29,21 @@ void loop() {
   if (Serial.available() != 0) {
     String input = Serial.readString();
     if (input.equals("o")) {
-      stepper.step(165, 0);
+      stepper.stepAcross();
       // stepper.step(1, 0);
       // steps += 1;
       // Serial.println(steps);
     } else if (input.equals("l")) {
-      stepper.step(165, 1);
+      stepper.stepAcross();
       // stepper.step(1, 1);
       // steps -= 1;
       // Serial.println(steps);
-    } else if (input.equals("k")) {
+    } else if (input.equals("[")) {
+      stepper.step(50, 0);
+    } else if (input.equals("'")) {
+      stepper.step(50, 1);
+    }
+    else if (input.equals("k")) {
       Serial.println("damp");
       digitalWrite(4, HIGH);
     } else if (input.equals("i")) {
@@ -47,6 +53,12 @@ void loop() {
       stepper.step(1, 0);
     } else if (input.equals(";")) {
       stepper.step(1, 1);
+    } else if (input.equals("m")) {
+      stepper.home();
+    } else if (input.equals("t")) {
+      Serial.println("listening...");
+      while (digitalRead(13) == HIGH) {}
+      Serial.println("Woah!");
     }
     else {
       digitalWrite(4, LOW);
